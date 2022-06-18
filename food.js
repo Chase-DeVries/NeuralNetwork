@@ -6,10 +6,15 @@ class Food {
     this.radius = 15
   }
 
-  show() {
+  show(index) {
     noStroke()
     fill(80, 0, 80)
     ellipse(this.pos.x, this.pos.y, this.radius);
+    fill(255)
+    let text_size = 25
+    textSize(text_size)
+    textAlign(CENTER)
+    text(index+1, this.pos.x, this.pos.y+text_size/3)
   }
 
   get_eaten(){

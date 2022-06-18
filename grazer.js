@@ -76,8 +76,8 @@ class Grazer {
     if(this.vel.y < 0){delta *= -1}
 
     for (let i = 0; i < this.ray_list.length; i++){
-      //inputs[i] = this.ray_tracer(this.pos, (delta + i), foods)
-      inputs[i] = this.ray_tracer(this.pos, (delta + this.ray_list[i]), foods)
+      //inputs[i] = this.ray_tracer(this.pos, (delta + this.ray_list[i]), foods)
+      inputs[i] = this.ray_tracer(this.pos, (delta + this.ray_list[i]), foods[this.score])
     }
     return inputs
   }
@@ -117,13 +117,15 @@ class Grazer {
     return dir_list
   }
 
-  ray_tracer(starting_point, direction, foods){
+  ray_tracer(starting_point, direction, food){
 
-    let total_length = 0
-    let iter = 10
+    let total_length = 0            // The current length of the ray
+    let iter = 10                   // The maximum number of iterations for a ray
 
     let ray_end
     let ray_length
+
+    let eaten = false
 
     // starting point of the ray
     let p_initial = starting_point
@@ -142,19 +144,21 @@ class Grazer {
 
       // finds dist to nearest ball
       let min_dist = width * height
-      for (let food of foods){
 
-        let dis = dist(food.pos.x, food.pos.y, p_initial.x, p_initial.y) - food.radius
+      // Look for the next food in the path of food
+      let dis = dist(food.pos.x, food.pos.y, p_initial.x, p_initial.y) - food.radius
 
-        if (dis < min_dist){
-          min_dist = dis
-        }
+      // If the distance to this food is less than the min, it is the min
+      if (dis < min_dist){
+        min_dist = dis
+      }
 
-        let food_dist = dist(this.pos.x, this.pos.y, food.pos.x, food.pos.y)
-        if (food_dist <= 20){
-          this.score += 1
-          food.get_eaten()
-        }
+      let food_dist = dist(this.pos.x, this.pos.y, food.pos.x, food.pos.y)
+
+      // If we are within the radius of the food, eat it
+      if (food_dist <= 20 && !eaten){
+        eaten = true
+        this.score += 1
       }
 
       // creates step var, a vector in the direction of the ray

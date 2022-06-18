@@ -28,13 +28,13 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
 
   generation_length = 3000
-  food_count = 3
-  grazer_count = 150
+  food_count = 1000
+  grazer_count = 300
   brain_size = [11, 20, 20, 8, 3]
 
   grazer_fov = 180
   grazer_mutation_rate = 0.05
-  grazer_mutation_strength = 0.15
+  grazer_mutation_strength = 0.25
   grazer_max_speed = 2
   grazer_turn_speed = 8
 
@@ -67,16 +67,12 @@ function setup() {
     grazer_list.push(grazer)
   }
 
+  manage_food()
+
 }
 
 function draw() {
   background(10);
-
-  handler()
-}
-
-function handler(){
-  // calls main functions at the appropriate time
   run_simulation()
   draw_gui()
 }
@@ -162,16 +158,22 @@ function new_generation(){
   generation_count += 1
   score_to_i = sort_brains()
 
+  // Reset the random path of food
+  manage_food()
+
 }
 
+
 function manage_food(){
-  // Initialize the foods spread randomly on the canvas
-  if (food_list.length < food_count){
-    for (let i = food_list.length; i < food_count; i++){
-      pos = createVector(random(0, width), random(0, height))
-      food = new Food(pos)
-      food_list.push(food)
-    }
+
+  // Generates a random list of food, replaces food_list
+  food_list = []
+
+  // Create food and add to the list
+  while (food_list.length < food_count) {
+    pos = createVector(random(0, width), random(0, height))
+    food = new Food(pos)
+    food_list.push(food)
   }
 }
 
@@ -179,17 +181,19 @@ function run_simulation(){
 
   if (paused == false){
 
+    // set of the index of food currently being pursued
+    food_set = new Set()
+
     // Call grazer functions for every grazer
     for (var g = 0; g < grazer_list.length; g++){
       grazer_list[g].update(food_list)
       grazer_list[g].show_score()
+      food_set.add(grazer_list[g].score)
     }
 
-    // controls the food population
-    manage_food()
     // Call food functions for every food
-    for (var food of food_list){
-      food.show()
+    for (var index of food_set){
+      food_list[index].show(index)
     }
 
     for (var g = 0; g < grazer_list.length; g++){
@@ -217,6 +221,7 @@ function draw_gui(){
     let avg_score = tot_score / grazer_list.length
 
     textSize(100)
+    textAlign(LEFT)
     noStroke()
 
     fill(80,160,80, 160)
@@ -350,27 +355,6 @@ function mousePressed(){
   }
 }
 
-function sort_brains_old(){
-  //print('sorting...')
-  let best_grazers = []
-  let best_scores = [0, 0, 0]
-  for (let grazer of grazer_list){
-    if (grazer.score > best_scores[0]){
-      best_scores[0] = grazer.score
-      best_grazers[0] = grazer
-    } else if (grazer.score > best_scores[1]) {
-      best_scores[1] = grazer.score
-      best_grazers[1] = grazer
-    } else if (grazer.score > best_scores[2]){
-      best_scores[2] = grazer.score
-      best_grazers[2] = grazer
-    }
-  }
-  //print('list:')
-  //print(best_grazers)
-  return best_grazers
-}
-
 /*
   Returns a new list of the grazers in the simulation sorted by their score
 */
@@ -388,10 +372,6 @@ function sort_brains(){
 
 
   return score_to_i
-}
-
-function get_score_brain_index_tuple() {
-
 }
 
 function show_brain(brain){
