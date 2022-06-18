@@ -1,58 +1,13 @@
 class Grazer {
 
-  constructor_old(pos_vector, vel_vector, spec_brain = 0) {
-
-    this.score = 1
-    this.max_health = 20
-    this.pos = pos_vector
-    this.vel = vel_vector
-    this.ray_lengths = []
-
-    this.ray_list = this.initialize_rays()
-    //print(this.ray_list)
-    //console.log(this.ray_list)
-    this.brain = new Brain(brain_size)
-
-    if (spec_brain != 0){
-      //print(spec_brain.bias)
-      console.log(spec_brain)
-      let weights_new = []
-      let bias_new = []
-      for (let l = 0; l < brain_size.length; l++){
-        bias_new[l] = [...spec_brain.bias[l]]
-        weights_new[l] = []
-        // for ever neuron on this layer
-        for (let n1 = 0; n1 < brain_size[l]; n1++){
-          if (l < brain_size.length - 1){
-            //print('V below V')
-            //print(spec_brain.weights[l])
-            weights_new[l][n1] = [...spec_brain.weights[l][n1]]
-          }
-        }
-      }
-      //print(bias_new)
-      //print(weights_new)
-      this.brain.weights = weights_new
-      this.brain.bias = bias_new
-    }
-
-
-
-
-    this.mutation_rate = grazer_mutation_rate
-    this.mutation_strength = grazer_mutation_strength
-    this.max_speed = grazer_max_speed
-    this.turn_speed = grazer_turn_speed
-  }
-
   constructor(pos_vector, vel_vector, spec_brain = 0) {
 
     this.mutation_rate = grazer_mutation_rate
     this.mutation_strength = grazer_mutation_strength
     this.max_speed = grazer_max_speed
     this.turn_speed = grazer_turn_speed
-    this.score = 1
-    this.max_health = 20
+
+    this.score = 0
     this.pos = pos_vector
     this.vel = vel_vector
     this.ray_lengths = []
@@ -93,7 +48,7 @@ class Grazer {
 
     noStroke()
     fill(225, 225, 225, 15)
-    ellipse(0, 0, this.score)
+    ellipse(0, 0, this.score*10)
 
     pop()
   }
@@ -197,7 +152,7 @@ class Grazer {
 
         let food_dist = dist(this.pos.x, this.pos.y, food.pos.x, food.pos.y)
         if (food_dist <= 20){
-          this.score += 10
+          this.score += 1
           food.get_eaten()
         }
       }
@@ -236,24 +191,11 @@ class Grazer {
 
   }
 
-  create_child(){
-
-    // creates a child at this grazer's position, opposite direction
-    let pos = createVector(random(width), random(height))
-    let vel = createVector(0.1, 0.1)
-    let child = new Grazer(pos, vel, this.max_health)
-    let brain = mutate(this.brain)
-    child.brain = brain
-    grazer_list.push(child)
-
-  }
-
   mutate(){
 
     let weights = this.brain.weights
     let bias = this.brain.bias
     let brain_list = brain_size
-    this.mutation_strength *= 3/(this.score)
 
     // Mutate the grazer's brain's weights and bias'
 
@@ -283,60 +225,8 @@ class Grazer {
         }
       }
     }
-
     this.brain.weights = weights
     this.brain.bias = bias
   }
-
-
-  mutate_old(){
-
-    let weights = this.brain.weights
-    let bias = this.brain.bias
-    let brain_list = brain_size
-    this.mutation_strength *= 3/(this.score)
-
-      // mutates the grazer's brain's weights and bias'
-    for (let l = 0; l < brain_list.length - 1; l++){
-      //print('weights['+l+']: '+ weights[l])
-      for (let n1 = 0; n1 < weights[l].length; n1++){
-
-        // mutates the grazer's brain's bias
-        let roll = random(0, 1)
-        if (roll <= this.mutation_rate){
-          //print('mutated bias[' + l + '][' + n1 + ']')
-          // mutates the bias by the mutation strength
-          bias[l][n1] *= random(1-this.mutation_strength, 1+this.mutation_strength)
-          let roll = random(0, 1)
-          if (roll <= this.mutation_rate){
-            bias[l][n1] = random(-1, 1)
-          }
-        }
-
-          // if the layer is not the last layer mutate weights between this and next layer
-         if (l < brain_list.length - 1) {
-          // for every neuron in the next layer
-          for (let n2 = 0; n2 < (weights[l][n1]).length; n2++){
-
-            // rolls for a chance to mutate
-            let roll = random(0, 1)
-
-            if (roll <= this.mutation_rate){
-              weights[l][n1][n2] *= random(1-this.mutation_strength, 1+this.mutation_strength)
-              let roll = random(0, 1)
-              if (roll <= this.mutation_rate){
-                weights[l][n1][n2] = random(-1, 1)
-              }
-            }
-          }
-        }
-      }
-    }
-
-    this.brain.weights = weights
-    this.brain.bias = bias
-  }
-
-
 
 }

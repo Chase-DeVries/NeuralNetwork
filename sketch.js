@@ -28,15 +28,15 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
 
   generation_length = 3000
-  food_count = 10
-  grazer_count = 75
-  brain_size = [11, 20, 20, 5, 3]
+  food_count = 3
+  grazer_count = 150
+  brain_size = [11, 20, 20, 8, 3]
 
   grazer_fov = 180
-  grazer_mutation_rate = 0.10
-  grazer_mutation_strength = 0.05
-  grazer_max_speed = 3
-  grazer_turn_speed = 10
+  grazer_mutation_rate = 0.05
+  grazer_mutation_strength = 0.15
+  grazer_max_speed = 2
+  grazer_turn_speed = 8
 
 
   frame_count = 0
@@ -108,32 +108,6 @@ function new_gen(){
 
 }
 
-function new_generation_old(){
-  let best_grazer
-  let next_gen = []
-
-
-  // adds
-  let max_score = 0
-  for (let g = 0; g < grazer_list.length; g++){
-    if (grazer_list[g].score > max_score){
-      max_score = grazer_list[g].score
-      best_grazer = grazer_list[g]
-    }
-  }
-
-  for (let j = 0; j < grazer_count; j++){
-    let winner_grazer = new Grazer(createVector(width / 2, height / 2), createVector(random(-1, 1), random(-1, 1)), best_grazer.brain )
-    winner_grazer.mutate()
-    next_gen.push(winner_grazer)
-
-  }
-
-  grazer_list = next_gen
-  frame_count = 0
-  generation_count += 1
-}
-
 function new_generation(){
 
   let next_gen = []
@@ -175,7 +149,6 @@ function new_generation(){
 
   curr_index = 3    // 4th highest ranked grazer
   while (next_gen.length < grazer_count) {
-    console.log(next_gen.length, grazer_count)
     let pos = createVector(width / 2, height / 2)
     let vel = createVector(random(-1, 1), random(-1, 1))
     brain = grazer_list[score_to_i[curr_index][1]].brain
