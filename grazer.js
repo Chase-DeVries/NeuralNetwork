@@ -14,6 +14,7 @@ class Grazer {
     this.ray_lengths = []
     this.ray_list = this.initialize_rays()
     this.brain = new Brain(brain_size)
+    this.path = [] // List of [x, y] location pairs
 
 
     if (spec_brain) {
@@ -55,8 +56,11 @@ class Grazer {
   }
 
   show_body() {
-    // draw the body of the grazer
 
+    // record the position of the grazer in path
+    this.path.push([this.pos.x, this.pos.y])
+
+    // draw the body of the grazer
     angleMode(DEGREES)
     push()
     translate(this.pos.x, this.pos.y);
