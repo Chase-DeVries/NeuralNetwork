@@ -33,10 +33,10 @@ function setup() {
   brain_size = [7, 20, 20, 8, 3]
 
   grazer_fov = 180
-  grazer_mutation_rate = 0.02
-  grazer_mutation_strength = 0.5
-  grazer_max_speed = 3
-  grazer_turn_speed = 10
+  grazer_mutation_rate = 0.05
+  grazer_mutation_strength = 0.15
+  grazer_max_speed = 5
+  grazer_turn_speed = 20
 
 
   frame_count = 0
@@ -61,8 +61,7 @@ function setup() {
 */
   for (let i = 0; i < grazer_count; i++){
     pos = createVector(width / 2, height / 2)
-    //vel = p5.Vector.random2D()
-    vel = createVector(random(-2, 2), random(-2, 2))
+    vel = createVector(1, 1)
     grazer = new Grazer(pos, vel, 0)
     grazer_list.push(grazer)
   }
@@ -115,42 +114,26 @@ function new_generation(){
 
   let curr_index = 0    // highest ranked grazer
   for (i = 0; i < floor(grazer_count / 2); i++) {
-    let pos = createVector(width / 2, height / 2)
-    let vel = createVector(random(-1, 1), random(-1, 1))
     brain = grazer_list[score_to_i[curr_index][1]].brain
-    new_g = new Grazer(pos, vel, brain)
-    new_g.mutate()
-    next_gen.push(new_g)
+    next_gen.push(create_grazer(brain))
   }
 
   curr_index = 1    // 2nd highest ranked grazer
   for (i = 0; i < floor(grazer_count / 4); i++) {
-    let pos = createVector(width / 2, height / 2)
-    let vel = createVector(random(-1, 1), random(-1, 1))
     brain = grazer_list[score_to_i[curr_index][1]].brain
-    new_g = new Grazer(pos, vel, brain)
-    new_g.mutate()
-    next_gen.push(new_g)
+    next_gen.push(create_grazer(brain))
   }
 
   curr_index = 2    // 3rd highest ranked grazer
   for (i = 0; i < floor(grazer_count / 5); i++) {
-    let pos = createVector(width / 2, height / 2)
-    let vel = createVector(random(-1, 1), random(-1, 1))
     brain = grazer_list[score_to_i[curr_index][1]].brain
-    new_g = new Grazer(pos, vel, brain)
-    new_g.mutate()
-    next_gen.push(new_g)
+    next_gen.push(create_grazer(brain))
   }
 
   curr_index = 3    // 4th highest ranked grazer
   while (next_gen.length < grazer_count) {
-    let pos = createVector(width / 2, height / 2)
-    let vel = createVector(random(-1, 1), random(-1, 1))
     brain = grazer_list[score_to_i[curr_index][1]].brain
-    new_g = new Grazer(pos, vel, brain)
-    new_g.mutate()
-    next_gen.push(new_g)
+    next_gen.push(create_grazer(brain))
   }
 
   grazer_list = next_gen
@@ -161,6 +144,14 @@ function new_generation(){
   // Reset the random path of food
   manage_food()
 
+}
+
+function create_grazer(brain) {
+  let pos = createVector(width / 2, height / 2)
+  let vel = createVector(1, 1)
+  new_g = new Grazer(pos, vel, brain)
+  new_g.mutate()
+  return new_g
 }
 
 function manage_food(){

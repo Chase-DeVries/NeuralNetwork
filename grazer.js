@@ -48,8 +48,8 @@ class Grazer {
     rotate(this.vel.heading());
 
     noStroke()
-    fill(225, 225, 225, 15)
-    ellipse(0, 0, (this.score + this.bonus)*10)
+    fill(225, 225, 225, 10)
+    ellipse(0, 0, (this.score + this.bonus)*3)
 
     pop()
   }
