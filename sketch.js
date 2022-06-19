@@ -30,13 +30,13 @@ function setup() {
   generation_length = 3000
   food_count = 1000
   grazer_count = 300
-  brain_size = [11, 20, 20, 8, 3]
+  brain_size = [7, 20, 20, 8, 3]
 
   grazer_fov = 180
-  grazer_mutation_rate = 0.05
-  grazer_mutation_strength = 0.25
-  grazer_max_speed = 2
-  grazer_turn_speed = 8
+  grazer_mutation_rate = 0.02
+  grazer_mutation_strength = 0.5
+  grazer_max_speed = 3
+  grazer_turn_speed = 10
 
 
   frame_count = 0
@@ -163,7 +163,6 @@ function new_generation(){
 
 }
 
-
 function manage_food(){
 
   // Generates a random list of food, replaces food_list
@@ -216,7 +215,7 @@ function draw_gui(){
   if (paused == false){
     let tot_score = 0
     for (let grazer of grazer_list){
-      tot_score += grazer.score
+      tot_score += grazer.score + grazer.bonus
     }
     let avg_score = tot_score / grazer_list.length
 
@@ -355,16 +354,13 @@ function mousePressed(){
   }
 }
 
-/*
-  Returns a new list of the grazers in the simulation sorted by their score
-*/
 function sort_brains(){
 
   let score_to_i = []           // [ (grazer_index, grazer_score) ]
 
   for (let i = 0; i < grazer_list.length; i++) {
-    grazer_score = grazer_list[i].score;
-    grazer_tuple = [grazer_list[i].score, i]
+    grazer_score = grazer_list[i].score + grazer_list[i].bonus;
+    grazer_tuple = [grazer_score, i]
     score_to_i.push(grazer_tuple);
   }
 

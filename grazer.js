@@ -8,6 +8,7 @@ class Grazer {
     this.turn_speed = grazer_turn_speed
 
     this.score = 0
+    this.bonus = 0
     this.pos = pos_vector
     this.vel = vel_vector
     this.ray_lengths = []
@@ -48,7 +49,7 @@ class Grazer {
 
     noStroke()
     fill(225, 225, 225, 15)
-    ellipse(0, 0, this.score*10)
+    ellipse(0, 0, (this.score + this.bonus)*10)
 
     pop()
   }
@@ -159,6 +160,8 @@ class Grazer {
       if (food_dist <= 20 && !eaten){
         eaten = true
         this.score += 1
+        food.get_eaten()
+        this.bonus += 1/(food.times_eaten+1)
       }
 
       // creates step var, a vector in the direction of the ray
