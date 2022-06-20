@@ -2,13 +2,13 @@ class Grazer {
 
   constructor(pos_vector, vel_vector, spec_brain = 0) {
 
-    this.brain_size = [20, 30, 30, 3]
+    this.brain_size = [7, 10, 3]
 
     this.fov = 200
     this.mutation_rate = 0.05
-    this.mutation_strength = 0.15
+    this.mutation_strength = 0.25
     this.max_speed = 5
-    this.turn_speed = 20
+    this.turn_speed = 3
 
     this.score = 0
     this.bonus = 0
@@ -53,7 +53,15 @@ class Grazer {
     translate(this.pos.x, this.pos.y);
 
     noStroke()
-    fill(225, 225, 225, 75)
+
+    if (this.rank == 0) {
+      fill(255, 166, 0, 75)
+    } else if (this.rank == 1) {
+      fill(128, 128, 128, 75)
+    } else if (this.rank == 2) {
+      fill(122, 48, 1, 75)
+    }
+
     ellipse(0, 0, 30)
 
     pop()
@@ -72,7 +80,7 @@ class Grazer {
     translate(this.pos.x, this.pos.y);
     rotate(this.vel.heading());
 
-    fill(40, 120, 0, 75);
+    fill(40, 120, 0, 25);
     if (this.showing_rays) {
       fill(40, 120, 0)
     }
@@ -131,7 +139,7 @@ class Grazer {
 
   ray_tracer(starting_point, direction, food){
     let total_length = 0            // The current length of the ray
-    let iter = 5                   // The maximum number of iterations for a ray
+    let iter = 10                   // The maximum number of iterations for a ray
 
     let ray_end
     let ray_length
@@ -182,12 +190,18 @@ class Grazer {
 
       if (this.showing_rays == true){
         // draws a line from starting point that distance in direction dir
-        stroke(80, 0, 20)
+        if (this.rank == 0) {
+          stroke(255, 166, 0, 75)
+        } else if (this.rank == 1) {
+          stroke(128, 128, 128, 75)
+        } else if (this.rank == 2) {
+          stroke(122, 48, 1, 75)
+        }
         line(p_initial.x, p_initial.y, p_initial.x + step.x, p_initial.y + step.y)
 
         // draws a circle at starting point of radius dis
-        noFill()
-        stroke(0,255,0)
+        //noFill()
+        //stroke(0,255,0)
         //circle(p_initial.x, p_initial.y, min_dist)
       }
 
@@ -195,11 +209,10 @@ class Grazer {
       p_initial = createVector(p_initial.x + step.x, p_initial.y + step.y)
       // counts one iteration
       iter--
-      if (min_dist <= 0.5){ray_end = 100}
-      if (min_dist >= 0.5){ray_end = 0}
+      if (min_dist <= 0.5){ray_end = 1}
+      if (min_dist > 0.5){ray_end = 0}
     }
-    //if (min_dist <= 0.5){ray_end = 1}
-    //if (min_dist >= 0.5){ray_end = 0}
+
     ray_length = (1 - (total_length / (sqrt(width*width + height * height))))
 
     //print(ray_end)
@@ -225,7 +238,10 @@ class Grazer {
         // if the random value is less than the mutation rate, mutate
         if (random(0, 1) <= this.mutation_rate) {
           // mutate the bias by a random percent (mutation strength)
-          bias[l][n1] *= random(1-this.mutation_strength, 1+this.mutation_strength)
+          let new_bias_val = bias[l][n1] * random(-(1+this.mutation_strength), 1+this.mutation_strength)
+          if (new_bias_val > 1) {new_bias_val = 1}
+          if (new_bias_val < -1) {new_bias_val = -1}
+          bias[l][n1] = new_bias_val
         }
 
         // If this is not the last layer, mutate the weights to the next layer
@@ -235,7 +251,10 @@ class Grazer {
             // roll a random number and compare to mutation rate
             if (random(0, 1) <= this.mutation_rate){
               // mutate the weight by the mutation strength
-              weights[l][n1][n2] *= random(1-this.mutation_strength, 1+this.mutation_strength)
+              let new_weight_val = weights[l][n1][n2]*random(-(1+this.mutation_strength), 1+this.mutation_strength)
+              if (new_weight_val > 1) {new_weight_val = 1}
+              if (new_weight_val < -1) {new_weight_val = -1}
+              weights[l][n1][n2] = new_weight_val
             }
           }
         }

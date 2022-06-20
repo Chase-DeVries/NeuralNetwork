@@ -4,7 +4,7 @@ class Shepard {
     this.grazer_list = []
     this.food_list = []
 
-    this.grazer_count = 300
+    this.grazer_count = 1000
     this.food_count = 100
 
     for (let i = 0; i < this.grazer_count; i++){
@@ -20,13 +20,24 @@ class Shepard {
 
   show() {
     // Rank the grazers
-    this.sort_brains()
-    let best_grazer = this.grazer_list[this.score_to_i[0][1]]
+    if (frame_count % 20 == 0) {this.sort_brains()}
+
+    //let best_grazer = this.grazer_list[this.score_to_i[0][1]]
 
     let top_lef = createVector(0, 0)
     let bot_rig = createVector(width, height)
-    display.draw_path(best_grazer,top_lef, bot_rig)
-    best_grazer.highlight()
+    //display.draw_path(best_grazer,top_lef, bot_rig)
+
+    // Draw a trail and rays for the best grazers
+    for (let i = 0; i < 3; i++) {
+      let best_grazer = this.grazer_list[this.score_to_i[i][1]]
+      display.draw_path(best_grazer,top_lef, bot_rig, false)
+      best_grazer.showing_rays = true
+      best_grazer.rank = i
+      best_grazer.highlight()
+    }
+
+    //best_grazer.highlight()
 
     // set of the index of food currently being pursued
     let food_set = new Set()
@@ -107,7 +118,6 @@ class Shepard {
       this.score_to_i.push(grazer_tuple);
     }
     this.score_to_i.sort(function compareFn(a, b) { return b[0]-a[0] })
-    this.grazer_list[this.score_to_i[0][1]].showing_rays = true
   }
 
   manage_food() {

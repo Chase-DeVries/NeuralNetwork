@@ -50,7 +50,8 @@ class Brain{
   // calculate values for next layer until last layer
   feed_forward(input_list){
     for (let i = 0; i < input_list.length; i++){
-      this.values[0][i] = this.sigmoid(input_list[i])
+      //this.values[0][i] = this.sigmoid(input_list[i])
+      this.values[0][i] = input_list[i]
     }
 
     // calculates the values for each layer based on inputs

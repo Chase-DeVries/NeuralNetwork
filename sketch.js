@@ -39,7 +39,7 @@ function setup() {
 
 
 
-  generation_length = 1500
+  generation_length = 3000
   frame_count = 0
   generation_count = 1
 
@@ -56,7 +56,7 @@ function setup() {
 }
 
 function draw() {
-  background(10);
+  background(0);
   run_simulation()
   display.draw_gui(shepard)
 }

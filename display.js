@@ -32,14 +32,10 @@ class Display {
       textSize(100)
       text('PAUSED (space)', 10, 100)
 
-      // show menu box
-      rectMode(CORNERS)
-      fill(60)
-      rect(20, 130, width - 20, height - 20)
-
-
-      fill(0)
-      text('Rank: '+(state_manager.display_index + 1)+'       Score: '+shepard.score_to_i[state_manager.display_index][0].toFixed(2), 30, 350)
+      textSize(60)
+      fill(100)
+      text('Rank: '+(state_manager.display_index + 1), 30, 180)
+      text('Score: '+shepard.score_to_i[state_manager.display_index][0].toFixed(2), 30, 250)
       // This actually shows the brain in score_to_i[index]
       // Get the score, index pair from the list (list should be sorted here)
       //current_pair = score_to_i[display_index]
@@ -59,7 +55,7 @@ class Display {
     }
   }
 
-  draw_path(grazer, top_lef, bot_rig, draw_food=false) {
+  draw_path(grazer, top_lef, bot_rig, rank, draw_food=false) {
 
     let prev_wid = width
     let prev_hei = height
@@ -70,13 +66,12 @@ class Display {
     let x_ratio = new_wid/prev_wid
     let y_ratio = new_hei/prev_hei
 
-    // Draw a frame around the area for the path
-    fill(0)
-    rect(top_lef.x, top_lef.y, bot_rig.x, bot_rig.y)
-
-    fill(80, 0, 80)
-    let path = grazer.path
     if (draw_food) {
+
+      // Draw a frame around the area for the path
+      fill(0)
+      rect(top_lef.x, top_lef.y, bot_rig.x, bot_rig.y)
+      fill(80, 0, 80)
       for (let i = 0; i < grazer.score; i++) {
         let x = shepard.food_list[i].pos.x * x_ratio + top_lef.x
         let y = shepard.food_list[i].pos.y * y_ratio + top_lef.y
@@ -85,6 +80,8 @@ class Display {
     }
 
     stroke(140)
+
+    let path = grazer.path
     // Draw each line segment connecting path coordinates
     for (let i = 0; i < grazer.path.length - 1; i++) {
       let x1 = path[i][0] * x_ratio + top_lef.x
@@ -97,6 +94,13 @@ class Display {
       y1 < top_lef.y || y1 > bot_rig.y ||
       y2 < top_lef.y || y2 > bot_rig.y)) {
         // Draw the line
+        if (grazer.rank == 0) {
+          stroke(255, 166, 0, 75)
+        } else if (grazer.rank == 1) {
+          stroke(128, 128, 128, 75)
+        } else if (grazer.rank == 2) {
+          stroke(122, 48, 1, 75)
+        }
         line(x1, y1, x2, y2)
       }
     }
@@ -114,12 +118,10 @@ class Display {
 
     // Draw each weight in the brain
     for (let weight of weight_info){
-      if (weight[0] > 0.2 || weight[0] < -0.2){
-        let green = map(weight[0], -2, 2, 0, 255)
-        let red = map(weight[0], -2, 2, 255, 0)
-        stroke(red, green, 0)
-        line(weight[1], weight[2], weight[3], weight[4])
-      }
+      let green = map(weight[0], -2, 2, 0, 255)
+      let red = map(weight[0], -2, 2, 255, 0)
+      stroke(red, green, 0)
+      line(weight[1], weight[2], weight[3], weight[4])
     }
     // Draw each neuron in the brian
     noStroke()
