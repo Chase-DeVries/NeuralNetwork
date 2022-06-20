@@ -2,19 +2,24 @@ class Grazer {
 
   constructor(pos_vector, vel_vector, spec_brain = 0) {
 
-    this.mutation_rate = grazer_mutation_rate
-    this.mutation_strength = grazer_mutation_strength
-    this.max_speed = grazer_max_speed
-    this.turn_speed = grazer_turn_speed
+    this.brain_size = [20, 30, 30, 3]
+
+    this.fov = 200
+    this.mutation_rate = 0.05
+    this.mutation_strength = 0.15
+    this.max_speed = 5
+    this.turn_speed = 20
 
     this.score = 0
     this.bonus = 0
     this.pos = pos_vector
     this.vel = vel_vector
     this.ray_lengths = []
-    this.ray_list = this.initialize_rays()
-    this.brain = new Brain(brain_size)
+    this.ray_list = []
+    this.initialize_rays()
+    this.brain = new Brain(this.brain_size)
     this.path = [] // List of [x, y] location pairs
+    this.showing_rays = false
 
 
     if (spec_brain) {
@@ -22,15 +27,15 @@ class Grazer {
       let new_bias = []
 
       // For each layer in the defined brain structure
-      for (let l = 0; l < brain_size.length; l++) {
+      for (let l = 0; l < this.brain_size.length; l++) {
         new_bias.push([...spec_brain.bias[l]])
 
         new_weight.push([])
 
         // For every neuron on this layer of the brain
-        for (let n1 = 0; n1 < brain_size[l]; n1++) {
+        for (let n1 = 0; n1 < this.brain_size[l]; n1++) {
           // If this neuron is not on the output layer
-          if (l < brain_size.length - 1) {
+          if (l < this.brain_size.length - 1) {
             new_weight[l][n1] = [...spec_brain.weights[l][n1]]
           }
         }
@@ -40,17 +45,16 @@ class Grazer {
     }
   }
 
-  show_score() {
+  highlight() {
     // draw a circle on the ground beneath the grazer_rays
 
     angleMode(DEGREES)
     push()
     translate(this.pos.x, this.pos.y);
-    rotate(this.vel.heading());
 
     noStroke()
-    fill(225, 225, 225, 10)
-    ellipse(0, 0, (this.score + this.bonus)*3)
+    fill(225, 225, 225, 75)
+    ellipse(0, 0, 30)
 
     pop()
   }
@@ -60,13 +64,18 @@ class Grazer {
     // record the position of the grazer in path
     this.path.push([this.pos.x, this.pos.y])
 
+
+
     // draw the body of the grazer
     angleMode(DEGREES)
     push()
     translate(this.pos.x, this.pos.y);
     rotate(this.vel.heading());
 
-    fill(40, 120, 0);
+    fill(40, 120, 0, 75);
+    if (this.showing_rays) {
+      fill(40, 120, 0)
+    }
     noStroke()
     triangle(-10, 10, -10, -10, 15, 0);
 
@@ -74,15 +83,13 @@ class Grazer {
   }
 
   look(food_list){
-    let foods = food_list
     let inputs = []
     let base_angle = createVector(1,0)
     let delta = this.vel.angleBetween(base_angle)
     if(this.vel.y < 0){delta *= -1}
 
     for (let i = 0; i < this.ray_list.length; i++){
-      //inputs[i] = this.ray_tracer(this.pos, (delta + this.ray_list[i]), foods)
-      inputs[i] = this.ray_tracer(this.pos, (delta + this.ray_list[i]), foods[this.score])
+      inputs[i] = this.ray_tracer(this.pos, (delta + this.ray_list[i]), food_list[this.score])
     }
     return inputs
   }
@@ -109,23 +116,22 @@ class Grazer {
   }
 
   initialize_rays(){
-    let ray_count = grazer_rays
-    let view_angle = grazer_fov
-    let delta_angle = (view_angle / (ray_count - 1))
+    this.ray_list = []
+
+    let delta_angle = (this.fov / (this.brain_size[0] - 1))
     let dir_list = []
 
     // creates a list of angles for rays
-    for (let x = 0; x < ray_count; x++) {
-      let r = (view_angle / 2) - (delta_angle * (x));
+    for (let x = 0; x < this.brain_size[0]; x++) {
+      let r = (this.fov / 2) - (delta_angle * (x));
       dir_list.push(r)
     }
-    return dir_list
+    this.ray_list = dir_list
   }
 
   ray_tracer(starting_point, direction, food){
-
     let total_length = 0            // The current length of the ray
-    let iter = 10                   // The maximum number of iterations for a ray
+    let iter = 5                   // The maximum number of iterations for a ray
 
     let ray_end
     let ray_length
@@ -139,7 +145,6 @@ class Grazer {
     let dir = createVector(1,0)
     dir.rotate(direction)
 
-
     while(iter > 0) {
 
       // finds the nearest ball and:
@@ -147,11 +152,11 @@ class Grazer {
         // and a circle that radius at start point
         // updates starting point
 
-      // finds dist to nearest ball
-      let min_dist = width * height
-
       // Look for the next food in the path of food
       let dis = dist(food.pos.x, food.pos.y, p_initial.x, p_initial.y) - food.radius
+
+      // finds dist to nearest ball
+      let min_dist = width * height
 
       // If the distance to this food is less than the min, it is the min
       if (dis < min_dist){
@@ -175,7 +180,7 @@ class Grazer {
       // adds the step length to the total length of the ray
       total_length += min_dist
 
-      if (debug == true){
+      if (this.showing_rays == true){
         // draws a line from starting point that distance in direction dir
         stroke(80, 0, 20)
         line(p_initial.x, p_initial.y, p_initial.x + step.x, p_initial.y + step.y)
@@ -206,7 +211,7 @@ class Grazer {
 
     let weights = this.brain.weights
     let bias = this.brain.bias
-    let brain_list = brain_size
+    let brain_list = this.brain_size
 
     // Mutate the grazer's brain's weights and bias'
 

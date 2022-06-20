@@ -1,32 +1,31 @@
 class Display {
-  constructor() {
-  }
+  constructor() {}
 
-  draw_gui() {
-    if (paused == false){
+  draw_gui(shepard) {
+    if (state_manager.paused == false){
       let tot_score = 0
-      for (let grazer of grazer_list){
+      for (let grazer of shepard.grazer_list){
         tot_score += grazer.score + grazer.bonus
       }
-      let avg_score = tot_score / grazer_list.length
+      let avg_score = tot_score / shepard.grazer_list.length
 
       textSize(100)
       textAlign(LEFT)
       noStroke()
 
       fill(80,160,80, 160)
-      text("pop: " + str(grazer_list.length), 20, 90)
+      text("pop: " + str(shepard.grazer_list.length), 20, 90)
 
       fill(80, 80,160, 160)
-      text("score: " + avg_score.toFixed(2), 20, 290)
+      text("score: " + avg_score.toFixed(2), 20, 190)
 
       fill(160, 80,80, 160)
-      text("time: " + round(generation_length - frame_count, 2), 20, 390)
+      text("time: " + round(generation_length - frame_count, 2), 20, 290)
 
       fill(160, 160, 160, 160)
-      text("gen: " + round(generation_count), 20, 490)
+      text("gen: " + round(state_manager.generation_count), 20, 390)
     }
-    if (paused == true){
+    else {
       noStroke()
       // show header
       fill(80, 40, 40)
@@ -38,59 +37,30 @@ class Display {
       fill(60)
       rect(20, 130, width - 20, height - 20)
 
-      // show visualize brain button
-      fill(20)
-      rect(30, 140, 330, 220)
-      textSize(50)
-      fill(80, 40, 40)
-      text('Show Brain', 40, 200)
 
-      // show the debug button (shows ray tracing)
-      fill(20)
-      rect(30, 230, 330, 310)
-      textSize(50)
-      fill(80, 40, 40)
-      let debug_string = "(Off)"
-      if (debug) {debug_string = "(On)"}
-      text('Debug ' + debug_string, 40, 290)
+      fill(0)
+      text('Rank: '+(state_manager.display_index + 1)+'       Score: '+shepard.score_to_i[state_manager.display_index][0].toFixed(2), 30, 350)
+      // This actually shows the brain in score_to_i[index]
+      // Get the score, index pair from the list (list should be sorted here)
+      //current_pair = score_to_i[display_index]
+      let grazer_to_show = shepard.grazer_list[shepard.score_to_i[state_manager.display_index][1]]
+      let lef_x = 0
+      let rig_x = width
+      let top_y = height/2
+      let bot_y = height
 
-      // add another food
-      fill(20)
-      rect(350, 140, 650, 220)
-      fill(80, 160, 80)
-      text('More Food', 360, 200)
+      this.draw_brain(grazer_to_show.brain,
+        createVector(lef_x, top_y),
+        createVector((lef_x+rig_x)/2, bot_y))
 
-      // remove a food
-      fill(20)
-      rect(350, 230, 650, 310)
-      fill(80, 160, 80)
-      text('Less Food', 360, 290)
-
-
-      if (showing_brain == true){
-        fill(0)
-        text('Rank: '+(display_index + 1)+'       Score: '+score_to_i[display_index][0].toFixed(2), 30, 350)
-        // This actually shows the brain in score_to_i[index]
-        // Get the score, index pair from the list (list should be sorted here)
-        //current_pair = score_to_i[display_index]
-        let grazer_to_show = grazer_list[score_to_i[display_index][1]]
-        let lef_x = 0
-        let rig_x = width
-        let top_y = height/2
-        let bot_y = height
-
-        this.draw_brain(grazer_to_show.brain,
-          createVector(lef_x, top_y),
-          createVector((lef_x+rig_x)/2, bot_y))
-
-        this.draw_path(grazer_to_show.path,
-          createVector((lef_x+rig_x)/2, top_y),
-          createVector(rig_x, bot_y))
-      }
+      this.draw_path(grazer_to_show,
+        createVector((lef_x+rig_x)/2, top_y),
+        createVector(rig_x, bot_y), true)
     }
   }
 
-  draw_path(path, top_lef, bot_rig) {
+  draw_path(grazer, top_lef, bot_rig, draw_food=false) {
+
     let prev_wid = width
     let prev_hei = height
 
@@ -104,10 +74,19 @@ class Display {
     fill(0)
     rect(top_lef.x, top_lef.y, bot_rig.x, bot_rig.y)
 
-    stroke(140)
+    fill(80, 0, 80)
+    let path = grazer.path
+    if (draw_food) {
+      for (let i = 0; i < grazer.score; i++) {
+        let x = shepard.food_list[i].pos.x * x_ratio + top_lef.x
+        let y = shepard.food_list[i].pos.y * y_ratio + top_lef.y
+        ellipse(x, y, 10)
+      }
+    }
 
+    stroke(140)
     // Draw each line segment connecting path coordinates
-    for (let i = 0; i < path.length - 1; i++) {
+    for (let i = 0; i < grazer.path.length - 1; i++) {
       let x1 = path[i][0] * x_ratio + top_lef.x
       let y1 = path[i][1] * y_ratio + top_lef.y
       let x2 = path[i+1][0] * x_ratio + top_lef.x
@@ -124,7 +103,7 @@ class Display {
   }
 
   draw_brain(brain, top_lef, bot_rig) {
-    let brain_list = brain_size
+    //let brain_list = brain_size
     let weights = brain.weights
     let bias = brain.bias
 
@@ -169,7 +148,7 @@ class Display {
 
   get_brain_display_info(brain, top_left_vec, bot_right_vec) {
     // gets brain elements
-    let brain_skele = brain_size
+    let brain_skele = brain.brain
     let brain_weights = brain.weights
     let brain_bias = brain.bias
 
