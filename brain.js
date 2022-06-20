@@ -80,7 +80,7 @@ class Brain{
     }
     weightedSum += this.bias[layer][neuron]
 
-    return (this.sigmoid(weightedSum));
+    return weightedSum //(this.sigmoid(weightedSum));
   }
 
 }

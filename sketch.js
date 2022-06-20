@@ -39,7 +39,7 @@ function setup() {
 
 
 
-  generation_length = 3000
+  generation_length = 500
   frame_count = 0
   generation_count = 1
 

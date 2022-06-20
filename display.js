@@ -51,7 +51,7 @@ class Display {
 
       this.draw_path(grazer_to_show,
         createVector((lef_x+rig_x)/2, top_y),
-        createVector(rig_x, bot_y), true)
+        createVector(rig_x, bot_y), -1, true)
     }
   }
 

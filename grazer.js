@@ -2,13 +2,12 @@ class Grazer {
 
   constructor(pos_vector, vel_vector, spec_brain = 0) {
 
-    this.brain_size = [7, 10, 3]
-
+    this.brain_size = [9,30, 3]
     this.fov = 200
     this.mutation_rate = 0.05
     this.mutation_strength = 0.25
     this.max_speed = 5
-    this.turn_speed = 3
+    this.turn_speed = 30
 
     this.score = 0
     this.bonus = 0
@@ -111,9 +110,9 @@ class Grazer {
     }
     let out = this.brain.feed_forward(inputs)
 
-    let turn_left = out[0] * this.turn_speed
-    let turn_right = out[1] * this.turn_speed
-    let move = out[2] * this.max_speed
+    let turn_left = this.brain.sigmoid(out[0]) * this.turn_speed
+    let turn_right = this.brain.sigmoid(out[1]) * this.turn_speed
+    let move = this.brain.sigmoid(out[2]) * this.max_speed
 
 
     this.vel.rotate(turn_left)
