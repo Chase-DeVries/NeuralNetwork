@@ -23,7 +23,7 @@
 function setup() {
   ellipseMode(RADIUS)
   angleMode(DEGREES)
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(500, 500);
 
   // Create state manager to communicate the state of the program
   state_manager = new StateManager()

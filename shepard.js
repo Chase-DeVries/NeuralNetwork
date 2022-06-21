@@ -20,7 +20,7 @@ class Shepard {
 
   show() {
     // Rank the grazers
-    if (frame_count % 20 == 0) {this.sort_brains()}
+    if (frame_count % 5 == 0) {this.sort_brains()}
 
     //let best_grazer = this.grazer_list[this.score_to_i[0][1]]
 
@@ -33,7 +33,6 @@ class Shepard {
       let best_grazer = this.grazer_list[this.score_to_i[i][1]]
       display.draw_path(best_grazer,top_lef, bot_rig, false)
       best_grazer.showing_rays = true
-      best_grazer.rank = i
       best_grazer.highlight()
     }
 
@@ -112,12 +111,18 @@ class Shepard {
     this.score_to_i = []           // [ (grazer_index, grazer_score) ]
 
     for (let i = 0; i < this.grazer_list.length; i++) {
-      this.grazer_list[i].showing_rays = false
+      this.grazer_list[i].background = true
+      this.grazer_list[i].rank = -1
       let grazer_score = this.grazer_list[i].score + this.grazer_list[i].bonus;
       let grazer_tuple = [grazer_score, i]
       this.score_to_i.push(grazer_tuple);
     }
     this.score_to_i.sort(function compareFn(a, b) { return b[0]-a[0] })
+
+    for (let i = 0; i < 3; i++) {
+      this.grazer_list[this.score_to_i[i][1]].rank = i
+      this.grazer_list[this.score_to_i[i][1]].background = false
+    }
   }
 
   manage_food() {

@@ -1,7 +1,12 @@
 class Display {
-  constructor() {}
+  constructor() {
+
+    this.display_grazer
+    this.display_food = new Food(createVector(0, 0))
+  }
 
   draw_gui(shepard) {
+    textAlign(LEFT)
     if (state_manager.paused == false){
       let tot_score = 0
       for (let grazer of shepard.grazer_list){
@@ -9,33 +14,34 @@ class Display {
       }
       let avg_score = tot_score / shepard.grazer_list.length
 
-      textSize(100)
-      textAlign(LEFT)
+      let text_size = 60
+      textSize(text_size)
+
       noStroke()
 
       fill(80,160,80, 160)
-      text("pop: " + str(shepard.grazer_list.length), 20, 90)
+      text("pop: " + str(shepard.grazer_list.length), 20, text_size)
 
       fill(80, 80,160, 160)
-      text("score: " + avg_score.toFixed(2), 20, 190)
+      text("score: " + avg_score.toFixed(2), 20, text_size*2)
 
       fill(160, 80,80, 160)
-      text("time: " + round(generation_length - frame_count, 2), 20, 290)
+      text("time: " + round(generation_length - frame_count, 2), 20, text_size*3)
 
       fill(160, 160, 160, 160)
-      text("gen: " + round(state_manager.generation_count), 20, 390)
+      text("gen: " + round(state_manager.generation_count), 20, text_size*4)
     }
     else {
       noStroke()
       // show header
       fill(80, 40, 40)
-      textSize(100)
-      text('PAUSED (space)', 10, 100)
+      textSize(50)
+      text('PAUSED (space)', 10, 50)
 
-      textSize(60)
+      textSize(30)
       fill(100)
-      text('Rank: '+(state_manager.display_index + 1), 30, 180)
-      text('Score: '+shepard.score_to_i[state_manager.display_index][0].toFixed(2), 30, 250)
+      text('Rank: '+(state_manager.display_index + 1), 30, 80)
+      text('Score: '+shepard.score_to_i[state_manager.display_index][0].toFixed(2), 30, 110)
       // This actually shows the brain in score_to_i[index]
       // Get the score, index pair from the list (list should be sorted here)
       //current_pair = score_to_i[display_index]
@@ -52,7 +58,43 @@ class Display {
       this.draw_path(grazer_to_show,
         createVector((lef_x+rig_x)/2, top_y),
         createVector(rig_x, bot_y), -1, true)
+
+      this.draw_simulator(createVector(width/2, 0),
+        createVector(width, height/2))
     }
+  }
+
+  draw_simulator(top_lef, bot_rig) {
+    fill(10, 0, 0)
+    rect(top_lef.x, top_lef.y, bot_rig.x, bot_rig.y)
+
+    let wid = bot_rig.x-top_lef.x
+    let hei = bot_rig.y-top_lef.y
+    let mid_x = (top_lef.x+bot_rig.x)/2
+    let mid_y = (top_lef.y+bot_rig.y)/2
+
+    let vel_vec = createVector(1, 0)
+    let pos_vec = createVector((top_lef.x+bot_rig.x)/2,(top_lef.y+bot_rig.y)/2)
+    let brain = shepard.grazer_list[shepard.score_to_i[state_manager.display_index][1]].brain
+    this.display_grazer = new Grazer(pos_vec, vel_vec, brain)
+
+    let pos = createVector(mid_x, mid_y)
+    if (mouseX < bot_rig.x && mouseX > top_lef.x &&
+    mouseY < bot_rig.y && mouseY > top_lef.y) {
+      pos = createVector(mouseX, mouseY)
+    }
+
+
+    this.display_food = new Food(pos)
+
+    let rays = this.display_grazer.look([this.display_food])
+    console.log(rays)
+    console.log(brain.feed_forward(rays))
+
+    this.display_food.show()
+    this.display_grazer.show_rays(top_lef, bot_rig)
+    this.display_grazer.background = false
+    this.display_grazer.show_body()
   }
 
   draw_path(grazer, top_lef, bot_rig, rank, draw_food=false) {
@@ -94,7 +136,9 @@ class Display {
       y1 < top_lef.y || y1 > bot_rig.y ||
       y2 < top_lef.y || y2 > bot_rig.y)) {
         // Draw the line
-        if (grazer.rank == 0) {
+        if (draw_food) {
+          stroke(255)
+        } else if (grazer.rank == 0) {
           stroke(255, 166, 0, 75)
         } else if (grazer.rank == 1) {
           stroke(128, 128, 128, 75)
@@ -129,20 +173,20 @@ class Display {
       let green = map(neuron_info[neuron][0], -2, 2, 0, 255)
       let red = map(neuron_info[neuron][0], -2, 2, 255, 0)
       fill(red, green, 0)
-      ellipse(neuron_info[neuron][1], neuron_info[neuron][2], 20)
+      ellipse(neuron_info[neuron][1], neuron_info[neuron][2], 8)
       // Label the output neurons
       if (neuron >= neuron_info.length - 3){
         fill(35)
         textAlign(LEFT)
         textSize(20)
         if (neuron == neuron_info.length - 3){
-          text('Left', neuron_info[neuron][1]+20, neuron_info[neuron][2]+10)
+          text('L', neuron_info[neuron][1]+20, neuron_info[neuron][2]+10)
         }
         if (neuron == neuron_info.length - 2){
-          text('Right', neuron_info[neuron][1]+20, neuron_info[neuron][2]+10)
+          text('R', neuron_info[neuron][1]+20, neuron_info[neuron][2]+10)
         }
         if (neuron == neuron_info.length - 1){
-          text('Straight', neuron_info[neuron][1]+20, neuron_info[neuron][2]+10)
+          text('S', neuron_info[neuron][1]+20, neuron_info[neuron][2]+10)
         }
       }
     }
