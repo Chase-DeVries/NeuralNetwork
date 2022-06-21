@@ -4,7 +4,7 @@ class Shepard {
     this.grazer_list = []
     this.food_list = []
 
-    this.grazer_count = 1000
+    this.grazer_count = 500
     this.food_count = 100
 
     for (let i = 0; i < this.grazer_count; i++){

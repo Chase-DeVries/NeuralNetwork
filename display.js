@@ -1,8 +1,9 @@
 class Display {
   constructor() {
-
     this.display_grazer
     this.display_food = new Food(createVector(0, 0))
+
+    this.display_helper = new DisplayHelper()
   }
 
   draw_gui(shepard) {
@@ -111,6 +112,10 @@ class Display {
     strokeWeight(1)
   }
 
+  draw_line_in_box(top_lef, bot_rig, c) {
+    this.display_helper.draw_line_in_box(top_lef, bot_rig, c)
+  }
+
   draw_path(grazer, top_lef, bot_rig, rank, draw_food=false) {
 
     let prev_wid = width
@@ -165,14 +170,11 @@ class Display {
   }
 
   draw_brain(brain, top_lef, bot_rig) {
-    //let brain_list = brain_size
     let weights = brain.weights
     let bias = brain.bias
 
     // get lists of brian info for display
-    let brain_display_info = this.get_brain_display_info(brain, top_lef, bot_rig)
-    let neuron_info = brain_display_info[0]
-    let weight_info = brain_display_info[1]
+    let [neuron_info, weight_info] = this.display_helper.get_brain_display_info(brain, top_lef, bot_rig)
 
     // Draw each weight in the brain
     for (let weight of weight_info){
@@ -188,82 +190,6 @@ class Display {
       let red = map(neuron_info[neuron][0], -2, 2, 255, 0)
       fill(red, green, 0)
       ellipse(neuron_info[neuron][1], neuron_info[neuron][2], 8)
-      // Label the output neurons
-      if (neuron >= neuron_info.length - 3){
-        fill(35)
-        textAlign(LEFT)
-        textSize(20)
-        if (neuron == neuron_info.length - 3){
-          text('L', neuron_info[neuron][1]+20, neuron_info[neuron][2]+10)
-        }
-        if (neuron == neuron_info.length - 2){
-          text('R', neuron_info[neuron][1]+20, neuron_info[neuron][2]+10)
-        }
-        if (neuron == neuron_info.length - 1){
-          text('S', neuron_info[neuron][1]+20, neuron_info[neuron][2]+10)
-        }
-      }
     }
-  }
-
-  get_brain_display_info(brain, top_left_vec, bot_right_vec) {
-    // gets brain elements
-    let brain_skele = brain.brain
-    let brain_weights = brain.weights
-    let brain_bias = brain.bias
-
-    // initializes output lists
-    let neuron_disp = []
-    let weight_disp = []
-
-    // stores the coordinates for each corner
-    let x_min = top_left_vec.x
-    let x_max = bot_right_vec.x
-    let y_min = top_left_vec.y
-    let y_max = bot_right_vec.y
-
-    // iterates thru every combination of layer, neuron1, neuron2
-    for (let layer = 0; layer < brain_skele.length; layer++){
-      for (let neuron1 = 0; neuron1 < brain_skele[layer]; neuron1++){
-
-        // create a list: [bias, x_coor, y_coor] for each neuron
-        let bias = brain_bias[layer][neuron1]
-        let coor_vec = this.get_neuron_coor(brain_skele, layer, neuron1, x_min, x_max, y_min, y_max)
-        let this_neuron = [bias, coor_vec.x, coor_vec.y]
-        neuron_disp.push(this_neuron)
-
-        // if this layer is not the last layer
-        if (layer < brain_skele.length - 1){
-          // for each neuron in the next layer
-          for (let neuron2 = 0; neuron2 < brain_skele[layer + 1]; neuron2++){
-            // create a list: [weight, x_coor_1, y_coor_1, x_coor_2, y_coor_2] for each weight
-            let weight = brain_weights[layer][neuron1][neuron2]
-            let vec1 = this.get_neuron_coor(brain_skele, layer, neuron1, x_min, x_max, y_min, y_max)
-            let vec2 = this.get_neuron_coor(brain_skele, layer+1, neuron2, x_min, x_max, y_min, y_max)
-            let this_weight = [weight, vec1.x, vec1.y, vec2.x, vec2.y]
-            weight_disp.push(this_weight)
-          }
-        }
-      }
-    }
-
-    let out = [neuron_disp, weight_disp]
-    return out
-  }
-
-  get_neuron_coor(brain_skele, layer, neuron, x_min, x_max, y_min, y_max){
-    // calculates a neuron's position within specified space and returns as a vector
-
-    // calculates x spacing between layers and returns neuron's x coor
-    let x_spacing = (x_max - x_min) / (brain_skele.length)
-    let x_coor = (x_spacing / 2) + (x_spacing * layer)
-
-    // calculates y spacing for a single layer and returns neuron's y coor
-    let y_spacing = (y_max - y_min) / (brain_skele[layer])
-    let y_coor = (y_spacing / 2) + (y_spacing * neuron)
-
-    // return a vector of the neuron's coordinates
-    let out = createVector(x_coor + x_min, y_coor + y_min)
-    return out
   }
 }

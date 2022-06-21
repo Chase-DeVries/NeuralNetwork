@@ -7,51 +7,37 @@
   - add poison food, display and input differently
 
 - adjustments while program is running
-  - food_count
-  - brain_size?
-  - brazer_count
-  - speed, turn, etc..
+  -
 
 - display
-  - highlight 3 best grazers
-  - rank brains in brain_display
-  - labels on brain_display
-    - input labels
-    - output labels
+  -
 */
 
 function setup() {
   ellipseMode(RADIUS)
   angleMode(DEGREES)
-  createCanvas(500, 500);
+  createCanvas(windowWidth, windowHeight);
+
+  generation_length = 1000
+  frame_count = 0
+  generation_count = 1
 
   // Create state manager to communicate the state of the program
   state_manager = new StateManager()
 
   // Create a shepard object for the sketch to manage grazers and food
-  shepard = new Shepard(state_manager)
+  shepard = new Shepard()
 
   // Create an input manager object for the sketch to send keypress / mouse info
-  input_manager = new InputManager(state_manager)
+  input_manager = new InputManager()
 
   // Create a display object for the sketch request drawing
-  display = new Display(state_manager)
-
-
-
-  generation_length = 500
-  frame_count = 0
-  generation_count = 1
-
-
-
+  display = new Display()
 /*
   GOOD BRAINS:
   [5, 3, 3]
   [10, 10, 10, 3]
 */
-
-  manage_food()
 
 }
 
@@ -59,11 +45,6 @@ function draw() {
   background(0);
   run_simulation()
   display.draw_gui(shepard)
-}
-
-function manage_food(){
-
-
 }
 
 function run_simulation(){
@@ -74,8 +55,7 @@ function run_simulation(){
     // updates the frame count
     frame_count += 1
   }
-
-  // spawns new generation after alotted time
+  // spawns new generation after allowed time
   if (frame_count >= generation_length && state_manager.paused == false){
     shepard.new_generation()
   }
@@ -87,9 +67,4 @@ function keyPressed(){
 
 function mousePressed(){
   input_manager.manage_mousepress(mouseX, mouseY)
-}
-
-function sort_brains(){
-
-
 }

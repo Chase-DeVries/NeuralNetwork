@@ -2,60 +2,38 @@ class Grazer {
 
   constructor(pos_vector, vel_vector, spec_brain = 0) {
 
-    this.brain_size = [5,10,3]
+    /*
+      This is way too much stuff, clean it up
+    */
+
+    this.brain_size = [5, 15, 3]
     this.fov = 200
     this.mutation_rate = 0.1
     this.mutation_strength = 0.5
-    this.max_speed = 3
+    this.max_speed = 5
     this.turn_speed = 30
 
     this.score = 0
     this.bonus = 0
     this.pos = pos_vector
     this.vel = vel_vector
-    this.ray_lengths = []
     this.ray_list = []
 
     this.ray_coords = []
-
     this.initialize_rays()
-    this.brain = new Brain(this.brain_size)
+
+    this.brain = new Brain(this.brain_size, spec_brain)
     this.path = [] // List of [x, y] location pairs
     this.background = true
 
 
-    if (spec_brain) {
-      let new_weight = []
-      let new_bias = []
 
-      // For each layer in the defined brain structure
-      for (let l = 0; l < this.brain_size.length; l++) {
-        new_bias.push([...spec_brain.bias[l]])
-
-        new_weight.push([])
-
-        // For every neuron on this layer of the brain
-        for (let n1 = 0; n1 < this.brain_size[l]; n1++) {
-          // If this neuron is not on the output layer
-          if (l < this.brain_size.length - 1) {
-            new_weight[l][n1] = [...spec_brain.weights[l][n1]]
-          }
-        }
-        this.brain.weights = new_weight
-        this.brain.bias = new_bias
-      }
-    }
   }
 
   highlight() {
     // draw a circle on the ground beneath the grazer_rays
-
     angleMode(DEGREES)
-    push()
-    translate(this.pos.x, this.pos.y);
-
     noStroke()
-
     if (this.rank == 0) {
       fill(255, 166, 0, 75)
     } else if (this.rank == 1) {
@@ -64,35 +42,31 @@ class Grazer {
       fill(122, 48, 1, 75)
     }
 
+    push()
+    translate(this.pos.x, this.pos.y);
     ellipse(0, 0, 30)
-
     pop()
   }
 
   show_body() {
-
-    // record the position of the grazer in path
-    this.path.push([this.pos.x, this.pos.y])
-
-
-
-    // draw the body of the grazer
+    // Set the stroke and fill for the grazer
     angleMode(DEGREES)
-    push()
-    translate(this.pos.x, this.pos.y);
-    rotate(this.vel.heading());
-
     fill(40, 120, 0, 25);
+    noStroke()
     if (!this.background) {
       fill(40, 120, 0)
     }
-    noStroke()
-    triangle(-10, 10, -10, -10, 15, 0);
 
+    // Draw the body of the grazer
+    push()
+    translate(this.pos.x, this.pos.y);
+    rotate(this.vel.heading());
+    triangle(-10, 10, -10, -10, 15, 0);
     pop()
   }
 
   show_rays(top_lef, bot_rig) {
+    // Draw the rays in the correct color
     if (this.rank == 0) {
       stroke(255, 166, 0, 75)
     } else if (this.rank == 1) {
@@ -102,8 +76,9 @@ class Grazer {
     } else {
       stroke(255)
     }
+    // draw all the lines only inside the area specified
     for (let c of this.ray_coords) {
-      this.draw_line_in_box(top_lef, bot_rig, c)
+      display.draw_line_in_box(top_lef, bot_rig, c)
     }
   }
 
@@ -124,24 +99,27 @@ class Grazer {
   }
 
   update(food_list){
-    /*
-      this should be happening inside of the brain, not here
-    */
+    // record the position of the grazer its path
+    this.path.push([this.pos.x, this.pos.y])
+
+    // Get the outputs from the brain and use accordingly
+    let [turn_left,turn_right,move] = this.use_brain(food_list)
+
+    // set brain's output in the appropriate fields
+    this.vel.setMag(move)
+    this.pos.add(this.vel)
+    this.vel.rotate(turn_left)
+    this.vel.rotate(-turn_right)
+  }
+
+  use_brain(food_list) {
     let rays = this.look(food_list)
     let inputs = []
     for (let i = 0; i < rays.length; i++){
       inputs[i] = rays[i]
     }
-    let out = this.brain.feed_forward(inputs)
+    return this.brain.feed_forward(inputs)
 
-    let turn_left = this.brain.sigmoid(out[0]) * this.turn_speed
-    let turn_right = this.brain.sigmoid(out[1]) * this.turn_speed
-    let move = this.brain.sigmoid(out[2]) * this.max_speed
-
-    this.vel.setMag(move)
-    this.pos.add(this.vel)
-    this.vel.rotate(turn_left)
-    this.vel.rotate(-turn_right)
   }
 
   initialize_rays(){
@@ -243,120 +221,7 @@ class Grazer {
 
   }
 
-  mutate(){
-
-    let weights = this.brain.weights
-    let bias = this.brain.bias
-    let brain_list = this.brain_size
-
-    // Mutate the grazer's brain's weights and bias'
-
-    // For each layer in the brain
-    for (let l  = 0; l < brain_list.length - 1; l++) {
-
-      // For each neuron in this layer of the brain
-      for (let n1 = 0; n1 < weights[l].length; n1++) {
-
-        // Mutate the brain's bias for each neuron on this layer
-        // if the random value is less than the mutation rate, mutate
-        if (random(0, 1) <= this.mutation_rate) {
-          // mutate the bias by a random percent (mutation strength)
-          //let new_bias_val = bias[l][n1] * random(-(1+this.mutation_strength), 1+this.mutation_strength)
-          let new_bias_val = bias[l][n1] + random(-this.mutation_strength, this.mutation_strength)
-          //if (new_bias_val > 1) {new_bias_val = 1}
-          //if (new_bias_val < -1) {new_bias_val = -1}
-          bias[l][n1] = new_bias_val
-        }
-
-        // If this is not the last layer, mutate the weights to the next layer
-        if (l < brain_list.length - 1) {
-          // for every neuron in the next layer
-          for (let n2 = 0; n2 < (weights[l][n1]).length; n2++){
-            // roll a random number and compare to mutation rate
-            if (random(0, 1) <= this.mutation_rate){
-              // mutate the weight by the mutation strength
-              //let new_weight_val = weights[l][n1][n2]*random(-(1+this.mutation_strength), 1+this.mutation_strength)
-              let new_weight_val = weights[l][n1][n2] + random(-this.mutation_strength, this.mutation_strength)
-              //if (new_weight_val > 1) {new_weight_val = 1}
-              //if (new_weight_val < -1) {new_weight_val = -1}
-              weights[l][n1][n2] = new_weight_val
-            }
-          }
-        }
-      }
-    }
-    this.brain.weights = weights
-    this.brain.bias = bias
-  }
-
-  draw_line_in_box(top_lef, bot_rig, c) {
-    // If the starting point is inside the box
-    if (!(c[0] < top_lef.x || c[0] > bot_rig.x ||
-    c[1] < top_lef.y || c[1] > bot_rig.y))
-    {
-      // If the ending point is inside the box
-      if (!(c[2] < top_lef.x || c[2] > bot_rig.x ||
-      c[3] < top_lef.y || c[3] > bot_rig.y))
-      {
-        line(c[0],c[1],c[2],c[3])
-      } else {
-        // If the first point is inside the box but the second is not
-        let [a1, b1, c1] = this.get_abc(c[0],c[1],c[2],c[3])
-        let slope = -a1/b1
-
-        // Starting and end point of the line to draw
-        let l1 = createVector(c[0],c[1])
-        let l2 = createVector(c[2],c[3])
-
-        let bot_lef = createVector(top_lef.x, bot_rig.y)
-        let top_rig = createVector(bot_rig.x, top_lef.y)
-
-        let p1, p2
-
-        if (slope >= 0 && b1 >= 0) {
-          // Intersection with right and bottom
-          p1 = this.get_intersection(l1, l2, top_rig, bot_rig)
-          p2 = this.get_intersection(l1, l2, bot_lef, bot_rig)
-        } else if (slope >= 0 && b1 < 0) {
-          // Intersection with left and top
-          p1 = this.get_intersection(l1, l2, bot_lef, top_lef)
-          p2 = this.get_intersection(l1, l2, top_rig, top_lef)
-        } else if (slope < 0 && b1 >= 0) {
-          // Intersection with right and top
-          p1 = this.get_intersection(l1, l2, bot_rig, top_rig)
-          p2 = this.get_intersection(l1, l2, top_rig, top_lef)
-        } else if (slope < 0 && b1 < 0) {
-          // Intersection with left and bottom
-          p1 = this.get_intersection(l1, l2, bot_lef, top_lef)
-          p2 = this.get_intersection(l1, l2, bot_lef, bot_rig)
-        }
-
-        let dist_p1 = createVector(p1.x - l1.x, p1.y - l1.y).mag()
-        let dist_p2 = createVector(p2.x - l1.x, p2.y - l1.y).mag()
-
-        if (dist_p1 < dist_p2) {
-          line(l1.x, l1.y, p1.x, p1.y)
-        } else {
-          line(l1.x, l1.y, p2.x, p2.y)
-        }
-      }
-    }
-  }
-
-  get_intersection(p1, p2, p3, p4) {
-    let [a1, b1, c1] = this.get_abc(p1.x, p1.y, p2.x, p2.y)
-    let [a2, b2, c2] = this.get_abc(p4.x, p4.y, p3.x, p3.y)
-
-    let x = ((b1*c2 - b2*c1)/(a1*b2 - a2*b1))
-    let y = ((c1*a2 - c2*a1)/(a1*b2 - a2*b1))
-
-    return createVector(x, y)
-  }
-
-  get_abc(x1, y1, x2, y2) {
-    let a = -(y2 - y1)
-    let b = (x2 - x1)
-    let c = -(a * x2 + b * y2)
-    return [a, b, c]
+  mutate() {
+    this.brain.mutate(this.mutation_rate, this.mutation_strength)
   }
 }
