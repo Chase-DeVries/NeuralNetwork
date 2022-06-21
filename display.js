@@ -88,13 +88,27 @@ class Display {
     this.display_food = new Food(pos)
 
     let rays = this.display_grazer.look([this.display_food])
-    console.log(rays)
-    console.log(brain.feed_forward(rays))
+    let inputs = rays
+    let out = brain.feed_forward(rays)
 
     this.display_food.show()
     this.display_grazer.show_rays(top_lef, bot_rig)
     this.display_grazer.background = false
     this.display_grazer.show_body()
+
+    let turn_left = this.display_grazer.brain.sigmoid(out[0]) * this.display_grazer.turn_speed
+    let turn_right = this.display_grazer.brain.sigmoid(out[1]) * this.display_grazer.turn_speed
+    let move = this.display_grazer.brain.sigmoid(out[2]) * this.display_grazer.max_speed
+
+    let vel = createVector(1,0)
+    vel.setMag(move*2)
+    vel.rotate(turn_left)
+    vel.rotate(-turn_right)
+
+    stroke(125, 0, 0)
+    strokeWeight(3)
+    line(pos_vec.x, pos_vec.y, pos_vec.x + vel.x, pos_vec.y +vel.y)
+    strokeWeight(1)
   }
 
   draw_path(grazer, top_lef, bot_rig, rank, draw_food=false) {

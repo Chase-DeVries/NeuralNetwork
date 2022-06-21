@@ -114,8 +114,11 @@ class Grazer {
     if(this.vel.y < 0){delta *= -1}
     this.ray_coords = []
     let prev_score = this.score
+
+    // For each ray, look for food
     for (let i = 0; i < this.ray_list.length; i++){
-      inputs[i] = this.ray_tracer(this.pos, (delta + this.ray_list[i]), food_list[prev_score])
+      let scoring = (this.score == prev_score)
+      inputs[i] = this.ray_tracer(this.pos, (delta + this.ray_list[i]), food_list[prev_score], scoring)
     }
     return inputs
   }
@@ -135,12 +138,10 @@ class Grazer {
     let turn_right = this.brain.sigmoid(out[1]) * this.turn_speed
     let move = this.brain.sigmoid(out[2]) * this.max_speed
 
-
-    this.vel.rotate(turn_left)
-    this.vel.rotate(-turn_right)
     this.vel.setMag(move)
     this.pos.add(this.vel)
-
+    this.vel.rotate(turn_left)
+    this.vel.rotate(-turn_right)
   }
 
   initialize_rays(){
@@ -157,12 +158,12 @@ class Grazer {
     this.ray_list = dir_list
   }
 
-  ray_tracer(starting_point, direction, food) {
+  ray_tracer(starting_point, direction, food, scoring) {
     /*
       this function does way too much. should not also eat the food
     */
     let total_length = 0            // The current length of the ray
-    let iter = 10                   // The maximum number of iterations for a ray
+    let iter = 8                   // The maximum number of iterations for a ray
 
     let ray_end
     let ray_length
@@ -197,7 +198,7 @@ class Grazer {
       let food_dist = dist(this.pos.x, this.pos.y, food.pos.x, food.pos.y)
 
       // If we are within the radius of the food, eat it
-      if (food_dist <= 20 && !eaten){
+      if (food_dist <= 20 && !eaten && scoring){
         eaten = true
         this.score += 1
         food.get_eaten()
@@ -231,8 +232,8 @@ class Grazer {
       p_initial = createVector(p_initial.x + step.x, p_initial.y + step.y)
       // counts one iteration
       iter--
-      if (min_dist <= 0.5){ray_end = 1}
-      if (min_dist > 0.5){ray_end = 0}
+      if (min_dist <= 1.5){ray_end = 1}
+      if (min_dist > 1.5){ray_end = 0}
     }
 
     ray_length = (1 - (total_length / (sqrt(width*width + height * height))))

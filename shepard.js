@@ -32,8 +32,8 @@ class Shepard {
     for (let i = 0; i < 3; i++) {
       let best_grazer = this.grazer_list[this.score_to_i[i][1]]
       display.draw_path(best_grazer,top_lef, bot_rig, false)
-      best_grazer.showing_rays = true
       best_grazer.highlight()
+      best_grazer.show_rays(top_lef, bot_rig)
     }
 
     //best_grazer.highlight()
