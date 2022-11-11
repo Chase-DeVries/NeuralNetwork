@@ -1,6 +1,6 @@
 # Neural Network Genetic Algorithm
 
-This is a project that I completed in the summer of 2021. It uses a library called p5, which is used to create the graphic display. The initial comit was carried over from [this project](https://editor.p5js.org/chase.devries@gmail.com/full/jgzhmTut1) that I made in the online p5 editor in 2019. The [Live Server vscode Extension](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) is required to run the project in your browser using a live server.
+This is a project that I completed in the summer of 2022. It uses a library called p5, which is used to create the graphic display. The initial comit was carried over from [this project](https://editor.p5js.org/chase.devries@gmail.com/full/jgzhmTut1) that I made in the online p5 editor in 2019. The [Live Server vscode Extension](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) is required to run the project in your browser using a live server.
 
 ## Getting started
 1. Open the project in vscode
