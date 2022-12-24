@@ -6,8 +6,9 @@ class Grazer {
       This is way too much stuff, clean it up
     */
 
-    this.brain_size = [3,4,5,4,3]
-    this.fov = 110
+    this.brain_size = [4, 3, 20, 5, 20, 3, 3]
+    this.memory_size = 5
+    this.fov = 180
     this.mutation_rate = 0.5
     this.mutation_strength = 0.5
     this.max_speed = 5
@@ -22,7 +23,8 @@ class Grazer {
     this.ray_coords = []
     this.initialize_rays()
 
-    this.brain = new Brain(this.brain_size, spec_brain)
+    this.brain = new Brain(this.brain_size, this.memory_size, spec_brain)
+    
     this.path = [] // List of [x, y] location pairs
     this.background = true
 
@@ -133,7 +135,7 @@ class Grazer {
   initialize_rays(){
     this.ray_list = []
 
-    let delta_angle = (this.fov / (this.brain_size[0] - 1))
+    let delta_angle = (this.fov / (this.brain_size[0]- 1))
     let dir_list = []
 
     // creates a list of angles for rays

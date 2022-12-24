@@ -5,9 +5,15 @@ class Brain{
   // list[0] = 6 -> 6 input nodes
   // list.length -> layers
 
-  constructor(brain_list, brain=0){
+  constructor(brain_list, memory_size, brain=0){
+
+    this.memory = memory_size
     this.brain = brain_list
 
+    // Add input and output neurons for memory
+    this.brain[0] += this.memory
+    this.brain[this.brain.length - 1] += this.memory
+    
     // weights: weights[layer_num][start_neuron][end_neuron]
     this.weights = []
     // values: values[layer_num][neuron_num]
@@ -26,10 +32,32 @@ class Brain{
   // input values for first layer
   // calculate values for next layer until last layer
   feed_forward(input_list){
+    // plug in input list (ray values)
     for (let i = 0; i < input_list.length; i++){
-      this.values[0][i] = this.sigmoid(input_list[i])
-      //this.values[0][i] = input_list[i]
+      //this.values[0][i] = this.sigmoid(input_list[i])
+      this.values[0][i] = input_list[i]
     }
+
+
+
+    // plug in memory outputs from prev frame as inputs
+    for (let i = 0; i < this.memory; i++){
+      let output_layer = this.brain.length - 1;
+      let num_rays = this.brain[0] - this.memory;
+      let num_outputs = this.brain[output_layer] - this.memory;
+      let mem_value = this.values[output_layer][i + num_outputs]
+
+
+      if (mem_value === undefined) {
+        mem_value = 1
+        console.log('undefined memory neuron (Brain::feed_forward())')
+      }
+
+      this.values[0][i + num_rays] = mem_value;
+      
+    }
+
+
 
     // calculates the values for each layer based on inputs
     for (let l = 1; l < this.brain.length; l++) {
