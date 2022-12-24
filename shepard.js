@@ -4,7 +4,7 @@ class Shepard {
     this.grazer_list = []
     this.food_list = []
 
-    this.grazer_count = 500
+    this.grazer_count = 700
     this.food_count = 100
 
     for (let i = 0; i < this.grazer_count; i++){
@@ -26,6 +26,7 @@ class Shepard {
 
     let top_lef = createVector(0, 0)
     let bot_rig = createVector(width, height)
+
     //display.draw_path(best_grazer,top_lef, bot_rig)
 
     // Draw a trail and rays for the best grazers
@@ -62,30 +63,61 @@ class Shepard {
     let next_gen = []
     let i = 0
     let brain
+    let curr_index
+    this.sort_brains()
+
+    // the best grazer fills entire next generation (Better for bigger brains??)
+    while (i < this.grazer_count) {
+      curr_index = Math.floor(Math.random() * (this.grazer_count / 50));
+      brain = this.grazer_list[this.score_to_i[curr_index][1]].brain
+      next_gen.push(this.create_grazer(brain))
+      i++;
+    }
+
+    this.grazer_list = next_gen
+    frame_count = 0
+    state_manager.generation_count += 1
+    this.sort_brains()
+
+    // Reset the random path of food
+    this.manage_food()
+  }
+
+  new_generation_old() {
+    let next_gen = []
+    let i = 0
+    let brain
     let vel
     let pos
     this.sort_brains()
 
     let curr_index = 0    // highest ranked grazer
-    for (i = 0; i < floor(this.grazer_count / 2); i++) {
-      brain = this.grazer_list[this.score_to_i[curr_index][1]].brain
-      next_gen.push(this.create_grazer(brain))
-    }
-
-    curr_index = 1    // 2nd highest ranked grazer
     for (i = 0; i < floor(this.grazer_count / 4); i++) {
       brain = this.grazer_list[this.score_to_i[curr_index][1]].brain
       next_gen.push(this.create_grazer(brain))
     }
 
+    curr_index = 1    // 2nd highest ranked grazer
+    for (i = 0; i < floor(this.grazer_count / 8); i++) {
+      brain = this.grazer_list[this.score_to_i[curr_index][1]].brain
+      next_gen.push(this.create_grazer(brain))
+    }
+
     curr_index = 2    // 3rd highest ranked grazer
-    for (i = 0; i < floor(this.grazer_count / 5); i++) {
+    for (i = 0; i < floor(this.grazer_count / 10); i++) {
       brain = this.grazer_list[this.score_to_i[curr_index][1]].brain
       next_gen.push(this.create_grazer(brain))
     }
 
     curr_index = 3    // 4th highest ranked grazer
+    for (i = 0; i < floor(this.grazer_count / 20); i++) {
+      brain = this.grazer_list[this.score_to_i[curr_index][1]].brain
+      next_gen.push(this.create_grazer(brain))
+    }
+
+    
     while (next_gen.length < this.grazer_count) {
+      curr_index = Math.floor(Math.random() * (this.grazer_count / 2));
       brain = this.grazer_list[this.score_to_i[curr_index][1]].brain
       next_gen.push(this.create_grazer(brain))
     }

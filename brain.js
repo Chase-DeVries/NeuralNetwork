@@ -27,8 +27,8 @@ class Brain{
   // calculate values for next layer until last layer
   feed_forward(input_list){
     for (let i = 0; i < input_list.length; i++){
-      //this.values[0][i] = this.sigmoid(input_list[i])
-      this.values[0][i] = input_list[i]
+      this.values[0][i] = this.sigmoid(input_list[i])
+      //this.values[0][i] = input_list[i]
     }
 
     // calculates the values for each layer based on inputs
@@ -47,6 +47,8 @@ class Brain{
     return (2 / (1 + exp(-1 * value)))
   }
 
+  
+
   calcValue(layer, neuron) {
     // assigns a value to values[layer][neuron]
     let weightedSum = 0;
@@ -57,7 +59,7 @@ class Brain{
     }
     weightedSum += this.bias[layer][neuron]
 
-    return weightedSum //(this.sigmoid(weightedSum));
+    return this.sigmoid(weightedSum);
   }
 
   mutate(mutation_rate, mutation_strength) {
@@ -86,6 +88,8 @@ class Brain{
             if (random(0, 1) <= mutation_rate){
               // mutate the weight by the mutation strength
               let new_weight_val = this.weights[l][n1][n2] + random(-mutation_strength, mutation_strength)
+              //if (new_weight_val > 1) {new_weight_val = 1}
+              //if (new_weight_val < -1) {new_weight_val = -1}
               this.weights[l][n1][n2] = new_weight_val
             }
           }

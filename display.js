@@ -97,9 +97,9 @@ class Display {
     this.display_grazer.background = false
     this.display_grazer.show_body()
 
-    let turn_left = this.display_grazer.brain.sigmoid(out[0]) * this.display_grazer.turn_speed
-    let turn_right = this.display_grazer.brain.sigmoid(out[1]) * this.display_grazer.turn_speed
-    let move = this.display_grazer.brain.sigmoid(out[2]) * this.display_grazer.max_speed
+    let turn_left = (out[0]) * this.display_grazer.turn_speed
+    let turn_right = (out[1]) * this.display_grazer.turn_speed
+    let move = (out[2]) * this.display_grazer.max_speed
 
     let vel = createVector(1,0)
     vel.setMag(move*2)

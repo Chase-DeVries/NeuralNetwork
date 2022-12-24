@@ -18,7 +18,7 @@ function setup() {
   angleMode(DEGREES)
   createCanvas(windowWidth, windowHeight);
 
-  generation_length = 1000
+  generation_length = 750
   frame_count = 0
   generation_count = 1
 

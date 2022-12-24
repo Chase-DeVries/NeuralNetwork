@@ -6,12 +6,12 @@ class Grazer {
       This is way too much stuff, clean it up
     */
 
-    this.brain_size = [5, 15, 3]
-    this.fov = 200
-    this.mutation_rate = 0.1
+    this.brain_size = [3,4,5,4,3]
+    this.fov = 110
+    this.mutation_rate = 0.5
     this.mutation_strength = 0.5
     this.max_speed = 5
-    this.turn_speed = 30
+    this.turn_speed = 90
 
     this.score = 0
     this.bonus = 0
@@ -66,6 +66,14 @@ class Grazer {
   }
 
   show_rays(top_lef, bot_rig) {
+
+    // if the grazer is off screen dont show its rays
+    if (this.pos.x > bot_rig.x || this.pos.x < 0 ||
+        this.pos.y > bot_rig.y || this.pos.y < 0) 
+    {
+        return
+    }
+
     // Draw the rays in the correct color
     if (this.rank == 0) {
       stroke(255, 166, 0, 75)
@@ -106,10 +114,10 @@ class Grazer {
     let [turn_left,turn_right,move] = this.use_brain(food_list)
 
     // set brain's output in the appropriate fields
-    this.vel.setMag(move)
+    this.vel.setMag(move * this.max_speed)
     this.pos.add(this.vel)
-    this.vel.rotate(turn_left)
-    this.vel.rotate(-turn_right)
+    this.vel.rotate(turn_left * this.turn_speed)
+    this.vel.rotate(-turn_right * this.turn_speed)
   }
 
   use_brain(food_list) {
